@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">transactions-service</a> &gt; <a href="index.source.html" class="el_package">com.bankx.api</a> &gt; <span class="el_source">TransactionController.java</span></div><h1>TransactionController.java</h1><pre class="source lang-java linenums">package com.bankx.api;
+
+import com.bankx.api.dto.CreateTxRequest;
+import com.bankx.domain.Transaction;
+import com.bankx.service.TransactionService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+
+@RestController
+@RequestMapping(&quot;/api&quot;)
+@RequiredArgsConstructor
+public class TransactionController {
+
+    private final TransactionService service;
+
+    @PostMapping(&quot;/transactions&quot;)
+    public Mono&lt;ResponseEntity&lt;Transaction&gt;&gt; create(@Valid @RequestBody CreateTxRequest req) {
+<span class="fc" id="L26">        return service.create(req.getAccountNumber(), req.getType(), req.getAmount()).map(t -&gt; ResponseEntity.status(HttpStatus.CREATED).body(t));</span>
+    }
+
+    @GetMapping(&quot;/transactions&quot;)
+    public Flux&lt;Transaction&gt; list(@RequestParam String accountNumber) {
+<span class="nc" id="L31">        return service.byAccount(accountNumber);</span>
+    }
+
+    @GetMapping(value = &quot;/stream/transactions&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux&lt;ServerSentEvent&lt;Transaction&gt;&gt; stream() {
+<span class="nc" id="L36">        return service.stream();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

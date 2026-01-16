@@ -1,0 +1,3 @@
+com\bankx\RiskServiceTest.class
+com\bankx\api\TransactionControllerTest.class
+com\bankx\mock\MockRiskControllerTest.class

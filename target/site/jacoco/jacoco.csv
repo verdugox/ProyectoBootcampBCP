@@ -1,0 +1,10 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+transactions-service,com.bankx.mock,MockRiskController,1,32,2,4,0,4,2,3,0,2
+transactions-service,com.bankx.api,TransactionController,9,17,0,0,2,1,2,2,2,2
+transactions-service,com.bankx.error,GlobalErrorHandler,0,19,0,0,0,3,0,3,0,3
+transactions-service,com.bankx.error,BusinessException,0,4,0,0,0,1,0,1,0,1
+transactions-service,com.bankx.service,TransactionService,49,199,3,7,7,47,8,12,5,10
+transactions-service,com.bankx.logging,LogContext,0,23,0,0,0,5,0,4,0,4
+transactions-service,com.bankx.legacy,DataSeeder,0,75,0,0,0,9,0,1,0,1
+transactions-service,com.bankx.legacy,RiskService,3,34,1,3,1,8,1,4,0,3
+transactions-service,com.bankx.risk,RiskRemoteClient,0,113,0,0,0,18,0,5,0,5

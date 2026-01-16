@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiskRemoteClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">transactions-service</a> &gt; <a href="index.source.html" class="el_package">com.bankx.risk</a> &gt; <span class="el_source">RiskRemoteClient.java</span></div><h1>RiskRemoteClient.java</h1><pre class="source lang-java linenums">package com.bankx.risk;
+
+import com.bankx.legacy.RiskService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
+
+<span class="fc" id="L15">@Log4j2</span>
+@Service
+@RequiredArgsConstructor
+public class RiskRemoteClient {
+
+    private final WebClient riskWebClient;
+    private final RiskService legacy;
+    private static final String BACKEND = &quot;riskClient&quot;;
+
+    @TimeLimiter(name = BACKEND)
+    @Retry(name = BACKEND)
+    @CircuitBreaker(name = BACKEND, fallbackMethod = &quot;fallback&quot;)
+    public Mono&lt;Boolean&gt; isAllowed(String currency, String type, BigDecimal amount) {
+<span class="fc" id="L28">        return Mono.deferContextual(ctx -&gt; {</span>
+<span class="fc" id="L29">            boolean fail   = ctx.getOrDefault(&quot;riskFail&quot;, false);</span>
+<span class="fc" id="L30">            long delayMs   = ctx.getOrDefault(&quot;riskDelayMs&quot;, 0L);</span>
+
+<span class="fc" id="L32">            log.debug(&quot;risk_remote_call currency={} type={} amount={} fail={} delayMs={}&quot;,</span>
+<span class="fc" id="L33">                   currency, type, amount, fail, delayMs);</span>
+
+<span class="fc" id="L35">            return riskWebClient.get()</span>
+<span class="fc" id="L36">                    .uri(u -&gt; u.path(&quot;/allow&quot;)</span>
+<span class="fc" id="L37">                            .queryParam(&quot;currency&quot;, currency)</span>
+<span class="fc" id="L38">                            .queryParam(&quot;type&quot;, type)</span>
+<span class="fc" id="L39">                            .queryParam(&quot;amount&quot;, amount)</span>
+<span class="fc" id="L40">                            .queryParam(&quot;fail&quot;, fail)</span>
+<span class="fc" id="L41">                            .queryParam(&quot;delayMs&quot;, delayMs)</span>
+<span class="fc" id="L42">                            .build())</span>
+<span class="fc" id="L43">                    .retrieve()</span>
+<span class="fc" id="L44">                    .bodyToMono(Boolean.class);</span>
+        });
+    }
+
+    private Mono&lt;Boolean&gt; fallback(String currency, String type, BigDecimal amount, Throwable ex) {
+<span class="fc" id="L49">        log.warn(&quot;risk_remote_fallback reason={}&quot;, ex.toString(), ex);</span>
+<span class="fc" id="L50">        return legacy.isAllowed(currency, type, amount);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

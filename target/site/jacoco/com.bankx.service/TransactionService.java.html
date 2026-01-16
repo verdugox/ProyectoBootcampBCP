@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">transactions-service</a> &gt; <a href="index.source.html" class="el_package">com.bankx.service</a> &gt; <span class="el_source">TransactionService.java</span></div><h1>TransactionService.java</h1><pre class="source lang-java linenums">package com.bankx.service;
+
+import com.bankx.domain.Account;
+import com.bankx.domain.Transaction;
+import com.bankx.error.BusinessException;
+import com.bankx.legacy.RiskService;
+import com.bankx.logging.LogContext;
+import com.bankx.repo.AccountRepository;
+import com.bankx.repo.TransactionRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+<span class="fc" id="L22">@Log4j2</span>
+@Service
+@RequiredArgsConstructor
+public class TransactionService {
+
+    private final AccountRepository accountRepo;
+    private final TransactionRepository txRepo;
+    private final com.bankx.risk.RiskRemoteClient riskRemoteClient;
+    private final RiskService riskService;
+    private final Sinks.Many&lt;Transaction&gt; txSink;
+    private final LogContext logContext;
+
+    public Mono&lt;Transaction&gt; create(String accountNumber, String type, BigDecimal amount) {
+<span class="fc" id="L35">        log.debug(&quot;create_tx_start account={} type={} amount={}&quot;, accountNumber, type, amount);</span>
+
+<span class="fc" id="L37">        return logContext.withMdc( // inyecta corrId del Reactor Context al MDC de Log4j2</span>
+<span class="fc" id="L38">                accountRepo.findByNumber(accountNumber)</span>
+<span class="fc" id="L39">                        .switchIfEmpty(Mono.error(new BusinessException(&quot;account_not_found&quot;)))</span>
+<span class="fc" id="L40">                        .flatMap(acc -&gt; validateAndApply(acc, type, amount))</span>
+<span class="pc" id="L41">                        .onErrorMap(IllegalStateException.class, e -&gt; new BusinessException(e.getMessage()))</span>
+<span class="fc" id="L42">                        .doOnSuccess(tx -&gt; {</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">                            if (tx != null) {</span>
+<span class="fc" id="L44">                                log.info(&quot;create_tx_ok account={} type={} amount={} id={}&quot;,</span>
+<span class="fc" id="L45">                                        accountNumber, type, amount, tx.getId());</span>
+                            }
+<span class="fc" id="L47">                        })</span>
+<span class="fc" id="L48">                        .doOnError(e -&gt; log.warn(&quot;create_tx_error account={} type={} amount={} error={}&quot;,</span>
+<span class="fc" id="L49">                                accountNumber, type, amount, e.getMessage()))</span>
+        );
+    }
+
+    private Mono&lt;Transaction&gt; validateAndApply(Account acc, String typeRaw, BigDecimal amount) {
+<span class="fc" id="L54">        final String type = typeRaw.toUpperCase();</span>
+
+        // 1) Riesgo (bloqueante envuelto -&gt; elastic)
+<span class="fc" id="L57">        return //riskService</span>
+                riskRemoteClient
+<span class="fc" id="L59">                .isAllowed(acc.getCurrency(), type, amount)</span>
+<span class="fc" id="L60">                .flatMap(allowed -&gt; {</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                    if (!allowed) {</span>
+<span class="fc" id="L62">                        log.warn(&quot;risk_rejected account={} currency={} type={} amount={}&quot;,</span>
+<span class="fc" id="L63">                                acc.getNumber(), acc.getCurrency(), type, amount);</span>
+<span class="fc" id="L64">                        return Mono.error(new BusinessException(&quot;risk_rejected&quot;));</span>
+                    }
+
+                    // 2) Reglas de negocio
+<span class="pc bpc" id="L68" title="1 of 4 branches missed.">                    if (&quot;DEBIT&quot;.equals(type) &amp;&amp; acc.getBalance().compareTo(amount) &lt; 0) {</span>
+<span class="fc" id="L69">                        log.warn(&quot;insufficient_funds account={} balance={} amount={}&quot;,</span>
+<span class="fc" id="L70">                                acc.getNumber(), acc.getBalance(), amount);</span>
+<span class="fc" id="L71">                        return Mono.error(new BusinessException(&quot;insufficient_funds&quot;));</span>
+                    }
+
+                    // 3) Actualiza balance
+<span class="fc" id="L75">                    return Mono.just(acc)</span>
+<span class="fc" id="L76">                            .publishOn(Schedulers.parallel())</span>
+<span class="fc" id="L77">                            .map(a -&gt; {</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">                                BigDecimal newBal = &quot;DEBIT&quot;.equals(type)</span>
+<span class="fc" id="L79">                                        ? a.getBalance().subtract(amount)</span>
+<span class="pc" id="L80">                                        : a.getBalance().add(amount);</span>
+<span class="fc" id="L81">                                a.setBalance(newBal);</span>
+<span class="fc" id="L82">                                return a;</span>
+                            })
+<span class="fc" id="L84">                            .flatMap(accountRepo::save)</span>
+                            // 4) Persiste la transacción
+<span class="fc" id="L86">                            .flatMap(saved -&gt; txRepo.save(Transaction.builder()</span>
+<span class="fc" id="L87">                                    .accountId(saved.getId())</span>
+<span class="fc" id="L88">                                    .type(type)</span>
+<span class="fc" id="L89">                                    .amount(amount)</span>
+<span class="fc" id="L90">                                    .timestamp(Instant.now())</span>
+<span class="fc" id="L91">                                    .status(&quot;OK&quot;)</span>
+<span class="fc" id="L92">                                    .build()))</span>
+                            // 5) Notifica por SSE
+<span class="fc" id="L94">                            .doOnNext(tx -&gt; {</span>
+<span class="fc" id="L95">                                txSink.tryEmitNext(tx);</span>
+<span class="fc" id="L96">                              log.debug(&quot;sse_emit accountId={} txId={} type={} amount={}&quot;,</span>
+<span class="fc" id="L97">                                    tx.getAccountId(), tx.getId(), tx.getType(), tx.getAmount());</span>
+<span class="fc" id="L98">                            });</span>
+                });
+  }
+
+  /**
+  * Obtiene el listado de transacciones asociadas a un número de cuenta.
+  * &lt;p&gt;
+  * Si la cuenta no existe, se emite un error de tipo
+  * {@link BusinessException} con el mensaje {@code account_not_found}.
+  * &lt;/p&gt;
+  *
+  * @param accountNumber número de cuenta a consultar
+  * @return un {@link Flux} con las transacciones de la cuenta en orden
+  *         descendente por fecha de creación
+  */
+  public Flux&lt;Transaction&gt; byAccount(String accountNumber) {
+<span class="nc" id="L114">    log.debug(&quot;list_tx account={}&quot;, accountNumber);</span>
+<span class="nc" id="L115">    return accountRepo.findByNumber(accountNumber)</span>
+<span class="nc" id="L116">              .switchIfEmpty(Mono.error(new BusinessException(&quot;account_not_found&quot;)))</span>
+<span class="nc" id="L117">              .flatMapMany(acc -&gt; txRepo.findByAccountIdOrderByTimestampDesc(acc.getId()));</span>
+  }
+
+  /**
+  * Expone un flujo reactivo de transacciones en tiempo real mediante
+  * Server-Sent Events (SSE).
+  * &lt;p&gt;
+  * Cada vez que se crea una nueva transacción, se emite un evento
+  * con el objeto {@link Transaction} correspondiente.
+  * &lt;/p&gt;
+  *
+  * @return un {@link Flux} de {@link ServerSentEvent} que transmite
+  *         las transacciones en vivo bajo el evento &quot;transaction&quot;.
+  */
+  public Flux&lt;ServerSentEvent&lt;Transaction&gt;&gt; stream() {
+<span class="nc" id="L132">    log.debug(&quot;subscribe_sse_transactions&quot;);</span>
+<span class="nc" id="L133">    return txSink.asFlux().map(tx -&gt;</span>
+<span class="nc" id="L134">                ServerSentEvent.builder(tx).event(&quot;transaction&quot;).build()</span>
+        );
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
