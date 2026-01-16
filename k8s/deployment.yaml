@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transactions-service
+  labels:
+    app: transactions-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transactions-service
+  template:
+    metadata:
+      labels:
+        app: transactions-service
+    spec:
+      containers:
+        - name: transactions-service
+          image: verdugox/transactions-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8085

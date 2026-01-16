@@ -97,4 +97,30 @@ jobs:                                          # Sección donde se definen los j
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/transactions-service:buildcache  # Usa cache de builds previos
           cache-to:   type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/transactions-service:buildcache,mode=max  # Actualiza el cache remoto
 
+      # ================================
+      # AKS DEPLOY
+      # ================================
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS context
+        run: |
+          az aks get-credentials \
+            --resource-group rg-cardops-demo \
+            --name aks-cardops-demo \
+            --overwrite-existing
+
+      - name: Deploy to AKS (Kubernetes)
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/ingress.yaml
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/transactions-service
+
+
 
