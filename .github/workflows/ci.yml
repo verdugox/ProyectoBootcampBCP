@@ -81,7 +81,7 @@ jobs:                                          # Sección donde se definen los j
         id: meta                               # ID del step (para outputs)
         uses: docker/metadata-action@v5
         with:                                  # Configuración de la metadata
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/card-ops-producer  # Nombre de la imagen
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/transactions-service  # Nombre de la imagen
           tags: |                              # Estrategias de versionado
             type=raw,value=latest              # Tag "latest"
             type=sha                           # Tag con el SHA del commit
@@ -94,7 +94,7 @@ jobs:                                          # Sección donde se definen los j
           push:    true                                     # Publica la imagen en DockerHub
           tags:    ${{ steps.meta.outputs.tags }}           # Tags generados en el paso meta
           labels:  ${{ steps.meta.outputs.labels }}         # Labels generados en el paso meta
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/card-ops-producer:buildcache  # Usa cache de builds previos
-          cache-to:   type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/card-ops-producer:buildcache,mode=max  # Actualiza el cache remoto
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/transactions-service:buildcache  # Usa cache de builds previos
+          cache-to:   type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/transactions-service:buildcache,mode=max  # Actualiza el cache remoto
 
 
