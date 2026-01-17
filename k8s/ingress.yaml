@@ -4,11 +4,13 @@ metadata:
   name: transactions-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - http:
+    - host: api.sorteosc.com
+      http:
         paths:
-          - path: /transactions-service
+          - path: /transactions
             pathType: Prefix
             backend:
               service:
