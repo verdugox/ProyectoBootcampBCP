@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: transactions-service
-          image: verdugox/transactions-service:latest
+          image: DOCKERHUB_USERNAME/transactions-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8085
