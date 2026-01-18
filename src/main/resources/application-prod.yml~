@@ -5,8 +5,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI}
-      database: bankx   # 👈 ESTA LÍNEA ES LA CLAVE
+      uri: ${MONGODB_URI:mongodb://mongo:27017/bankx}
 
   jpa:
     hibernate:
