@@ -5,8 +5,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.sorteosc.com
-      http:
+    - http:
         paths:
           - path: /api/transactions
             pathType: Prefix
