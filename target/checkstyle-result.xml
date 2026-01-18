@@ -257,7 +257,8 @@
 <error line="95" column="33" severity="warning" message="El hijo de &apos;block&apos; estás en el nivel de sangrado 32, pero esto no es el nivel correcto. Se esperaba el nivel 30." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 </file>
 <file name="D:\ProyectosBOOTCAMP-Chapter\ProyectoBootcampBCP\src\main\java\com\bankx\TransactionsServiceApplication.java">
-<error line="16" column="5" severity="warning" message="Bloquear comentario tiene nivel incorrecto muesca 4, que se espera es 2, la sangría debe estar al mismo nivel que la línea 22." source="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck"/>
+<error line="12" column="1" severity="warning" message="&apos;CLASS_DEF&apos; debe estar separado de la línea anterior." source="com.puppycrawl.tools.checkstyle.checks.whitespace.EmptyLineSeparatorCheck"/>
+<error line="15" column="5" severity="warning" message="Bloquear comentario tiene nivel incorrecto muesca 4, que se espera es 2, la sangría debe estar al mismo nivel que la línea 21." source="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck"/>
 </file>
 <file name="D:\ProyectosBOOTCAMP-Chapter\ProyectoBootcampBCP\src\test\java\com\bankx\api\TransactionControllerTest.java">
 <error line="20" column="5" severity="warning" message="&apos;member def modifier&apos; estás en el nivel de sangrado 4, pero esto no es el nivel correcto. Se esperaba el nivel 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>

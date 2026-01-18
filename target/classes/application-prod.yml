@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
