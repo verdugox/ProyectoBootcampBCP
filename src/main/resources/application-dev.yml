@@ -16,3 +16,7 @@ spring:
     console:
       enabled: true
       path: /h2
+
+risk:
+  service:
+    base-url: http://localhost:8084/mock/risk

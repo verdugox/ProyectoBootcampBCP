@@ -8,9 +8,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientCfg {
 
     @Bean
-    public WebClient riskWebClient() {
+    public WebClient riskWebClient(
+            @Value("${risk.service.base-url}") String baseUrl) {
+
         return WebClient.builder()
-                .baseUrl("http://localhost:8084/mock/risk")
+                .baseUrl(baseUrl)
                 .build();
     }
 }
