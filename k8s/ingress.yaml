@@ -10,10 +10,10 @@ spec:
   rules:
     - http:
         paths:
-          - path: /cardops(/|$)(.*)
+          - path: /cardops/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: transactions-service
                 port:
-                  number: 80
+                  number: 8085
