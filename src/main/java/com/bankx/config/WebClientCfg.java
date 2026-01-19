@@ -12,8 +12,13 @@ public class WebClientCfg {
     public WebClient riskWebClient(
             @Value("${risk.service.base-url}") String baseUrl) {
 
+        HttpClient httpClient = HttpClient.create()
+                .responseTimeout(Duration.ofSeconds(3));
+
         return WebClient.builder()
                 .baseUrl(baseUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
+
 }
