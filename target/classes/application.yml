@@ -11,6 +11,7 @@ logging:
     org.springframework.data.mongodb: info
     org.hibernate.SQL: debug
 
+
 management:
   endpoints:
     web:

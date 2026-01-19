@@ -1,4 +1,4 @@
-# Created at 2026-01-17T22:25:11.542
+# Created at 2026-01-19T10:41:18.469
 Boot Manifest-JAR contains absolute paths in classpath 'D:\ProyectosBOOTCAMP-Chapter\ProyectoBootcampBCP\target\test-classes'
 Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 'other' has different root
