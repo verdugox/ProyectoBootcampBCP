@@ -2,17 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: transactions-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /api/transactions
+          - path: /
             pathType: Prefix
             backend:
               service:
                 name: transactions-service
                 port:
-                  number: 80   # 👈 SIEMPRE EL PORT DEL SERVICE
+                  number: 8085
