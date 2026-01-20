@@ -118,6 +118,10 @@ jobs:                                          # Sección donde se definen los j
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/ingress.yaml
 
+      - name: Restart deployment (force pod recreation)
+        run: |
+          kubectl rollout restart deployment/transactions-service
+
       - name: Verify rollout
         run: |
           kubectl rollout status deployment/transactions-service
