@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: transactions-ingress
+  namespace: default
 spec:
   ingressClassName: nginx
   rules:
@@ -14,4 +15,3 @@ spec:
                 name: transactions-service
                 port:
                   number: 8085
-
