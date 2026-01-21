@@ -1,3 +1,7 @@
+server:
+  port: 8085
+  address: 0.0.0.0
+
 spring:
   config:
     activate:
@@ -6,7 +10,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI}
-      database: bankx   # 👈 ESTA LÍNEA ES LA CLAVE
+      database: bankx
 
   jpa:
     hibernate:
