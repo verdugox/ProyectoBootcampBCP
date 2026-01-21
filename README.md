@@ -2,7 +2,7 @@
 
 **Caso:** BankX – Microservicio de Movimientos y Riesgo
 
-**Autor:** Ivan Morales Manayalle
+**Autor:** Luis Andres Acuña Ramos
 
 **Stack:** Spring Boot 3 · WebFlux · MongoDB (reactivo) · JPA/H2 (legado) · Resilience4j · Log4j2
 
