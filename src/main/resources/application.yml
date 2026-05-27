@@ -5,6 +5,7 @@ spring:
   profiles:
     active: dev   # por defecto LOCAL
 
+
 logging:
   level:
     org.springframework.r2dbc: warn
