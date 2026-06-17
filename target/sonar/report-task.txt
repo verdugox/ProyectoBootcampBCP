@@ -2,5 +2,5 @@ projectKey=com.bankx:transactions-service
 serverUrl=http://localhost:9000
 serverVersion=25.1.0.102122
 dashboardUrl=http://localhost:9000/dashboard?id=com.bankx%3Atransactions-service
-ceTaskId=1693b698-aa50-4deb-86b0-45bdd49eb1f0
-ceTaskUrl=http://localhost:9000/api/ce/task?id=1693b698-aa50-4deb-86b0-45bdd49eb1f0
+ceTaskId=e6f845fd-6768-4de0-a3cf-3851e77e9e17
+ceTaskUrl=http://localhost:9000/api/ce/task?id=e6f845fd-6768-4de0-a3cf-3851e77e9e17

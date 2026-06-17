@@ -122,6 +122,7 @@ jobs:                                          # Sección donde se definen los j
         run: |
           kubectl rollout restart deployment/transactions-service
 
+
       - name: Verify rollout
         run: |
           kubectl rollout status deployment/transactions-service
